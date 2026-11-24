@@ -1,0 +1,10 @@
+*.idea
+.env
+
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+
+*.yml
+*.yaml
