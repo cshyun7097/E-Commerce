@@ -15,7 +15,9 @@ public enum ErrorCode {
     ACCOUNT_LOCKED(HttpStatus.UNAUTHORIZED, "로그인 5회 실패로 계정이 10분간 잠겼습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    NOT_STORE_OWNER(HttpStatus.FORBIDDEN, "본인 상점만 삭제할 수 있습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
+    STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 상점입니다."),
     DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
     ALREADY_WITHDRAWN(HttpStatus.CONFLICT, "탈퇴한 회원입니다."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");

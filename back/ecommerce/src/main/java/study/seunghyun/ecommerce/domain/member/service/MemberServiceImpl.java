@@ -6,11 +6,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import study.seunghyun.ecommerce.domain.member.domain.Member;
+import study.seunghyun.ecommerce.domain.member.domain.Role;
 import study.seunghyun.ecommerce.domain.member.dto.MemberResponse;
 import study.seunghyun.ecommerce.domain.member.dto.MemberUpdateRequest;
 import study.seunghyun.ecommerce.domain.member.dto.SignUpRequest;
 import study.seunghyun.ecommerce.domain.member.repository.MemberRepository;
 import study.seunghyun.ecommerce.domain.member.repository.RefreshTokenRepository;
+import study.seunghyun.ecommerce.domain.store.service.StoreService;
 import study.seunghyun.ecommerce.global.BusinessException;
 import study.seunghyun.ecommerce.global.ErrorCode;
 
@@ -22,6 +24,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final StoreService storeService;
 
     @Override
     public MemberResponse signUp(SignUpRequest request) {
@@ -48,6 +51,9 @@ public class MemberServiceImpl implements MemberService {
     public MemberResponse withdraw(String loginId, String password) {
         Member member = getActiveMemberWithPassword(loginId, password);
         member.withdraw();
+        if (member.getRole() == Role.SELLER) {
+            storeService.deactivateAllOf(member.getId());
+        }
         return MemberResponse.from(member);
     }
 

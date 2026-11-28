@@ -83,6 +83,9 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/members/signup", "/api/members/login", "/api/members/reissue").permitAll()
+                        // 순서 중요: 목록 조회 규칙이 SELLER 규칙보다 먼저 와야 함
+                        .requestMatchers(HttpMethod.GET, "/api/stores").hasAnyRole("BUYER", "SELLER")
+                        .requestMatchers("/api/stores/**").hasRole("SELLER")
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(entryPoint)

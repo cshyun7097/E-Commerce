@@ -12,6 +12,7 @@ import study.seunghyun.ecommerce.domain.member.dto.MemberUpdateRequest;
 import study.seunghyun.ecommerce.domain.member.dto.SignUpRequest;
 import study.seunghyun.ecommerce.domain.member.repository.MemberRepository;
 import study.seunghyun.ecommerce.domain.member.repository.RefreshTokenRepository;
+import study.seunghyun.ecommerce.domain.store.service.StoreService;
 import study.seunghyun.ecommerce.global.BusinessException;
 import study.seunghyun.ecommerce.global.ErrorCode;
 import study.seunghyun.ecommerce.domain.member.service.MemberServiceImpl;
@@ -28,7 +29,8 @@ class MemberServiceImplTest {
     MemberRepository repository = mock(MemberRepository.class);
     PasswordEncoder encoder = new BCryptPasswordEncoder();
     RefreshTokenRepository refreshTokenRepository = mock(RefreshTokenRepository.class);
-    MemberServiceImpl service = new MemberServiceImpl(repository, encoder, refreshTokenRepository);
+    StoreService storeService = mock(StoreService.class);
+    MemberServiceImpl service = new MemberServiceImpl(repository, encoder, refreshTokenRepository, storeService);
     Member member;
 
     @BeforeEach
@@ -76,6 +78,19 @@ class MemberServiceImplTest {
         assertThatThrownBy(() -> service.withdraw("hong123", "password1")).isInstanceOf(BusinessException.class).extracting("errorCode").isEqualTo(ErrorCode.ALREADY_WITHDRAWN);
         assertThatThrownBy(() -> service.update("hong123", MemberUpdateRequest.builder().currentPassword("password1").address("부산").build()))
                 .isInstanceOf(BusinessException.class).extracting("errorCode").isEqualTo(ErrorCode.ALREADY_WITHDRAWN);
+    }
+
+    @Test
+    void 판매자가_탈퇴하면_상점도_비활성화하고_구매자는_건드리지_않는다() {
+        Member seller = Member.builder().name("판매자").phoneNumber("01011112222").address("서울")
+                .loginId("seller1").password(encoder.encode("password1")).role(Role.SELLER).build();
+        when(repository.findByLoginId("seller1")).thenReturn(Optional.of(seller));
+
+        service.withdraw("seller1", "password1");
+        verify(storeService).deactivateAllOf(seller.getId());
+
+        service.withdraw("hong123", "password1");
+        verifyNoMoreInteractions(storeService);
     }
 
     @Test
